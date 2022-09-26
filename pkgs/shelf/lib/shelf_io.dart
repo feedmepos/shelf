@@ -203,7 +203,10 @@ Request _fromHttpRequest(HttpRequest request) {
 }
 
 Future<void> _writeResponse(
-    Response response, HttpResponse httpResponse, String? poweredByHeader) {
+  Response response,
+  HttpResponse httpResponse,
+  String? poweredByHeader,
+) {
   if (response.context.containsKey('shelf.io.buffer_output')) {
     httpResponse.bufferOutput =
         response.context['shelf.io.buffer_output'] as bool;
@@ -250,9 +253,17 @@ Future<void> _writeResponse(
     httpResponse.headers.date = DateTime.now().toUtc();
   }
 
-  return httpResponse
-      .addStream(response.read())
-      .then((_) => httpResponse.close());
+  if (httpResponse.bufferOutput == false) {
+    return httpResponse
+        .addStream(response.read())
+        .then((value) => httpResponse.close())
+        .then((value) => httpResponse.done)
+        .then((value) => response.onDone?.call());
+  } else {
+    return httpResponse
+        .addStream(response.read())
+        .then((value) => httpResponse.close());
+  }
 }
 
 /// Common header to advertise the server technology being used.

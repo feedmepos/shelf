@@ -41,6 +41,8 @@ class Response extends Message {
 
   DateTime? _lastModifiedCache;
 
+  final Future<void> Function()? onDone;
+
   /// Constructs a 200 OK response.
   ///
   /// This indicates that the request has succeeded.
@@ -266,6 +268,7 @@ class Response extends Message {
     Map<String, /* String | List<String> */ Object>? headers,
     Encoding? encoding,
     Map<String, Object>? context,
+    this.onDone,
   }) : super(body, encoding: encoding, headers: headers, context: context) {
     if (statusCode < 100) {
       throw ArgumentError('Invalid status code: $statusCode.');
@@ -307,6 +310,7 @@ class Response extends Message {
       body: body,
       headers: headersAll,
       context: newContext,
+      onDone: onDone,
     );
   }
 }
